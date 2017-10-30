@@ -19,7 +19,6 @@ Quick start (Unix, or Windows with Cygwin):
     unused *.o files (keeps the compiled libraries and demo programs).  See the
     User Guide (Doc/AMD_UserGuide.pdf), or
     ../SuiteSparse_config/SuiteSparse_config.mk for more details.
-    To install do "make install"
 
 Quick start (for MATLAB users);
 
@@ -190,6 +189,9 @@ Files and directories in the AMD distribution:
     MATLAB directory:
     ---------------------------------------------------------------------------
 
+    GNUmakefile			a nice Makefile, for GNU make
+    Makefile			an ugly Unix Makefile (for older make's)
+
     Contents.m			for "help amd2" listing of toolbox contents
 
     amd2.m			MATLAB help file for AMD
@@ -203,8 +205,9 @@ Files and directories in the AMD distribution:
     can_24.mat			input file for AMD demo
 
     ---------------------------------------------------------------------------
-    Lib directory:  libamd.a and libamd.so library placed here
+    Lib directory:  libamd.a and libamdf77.a libraries placed here
     ---------------------------------------------------------------------------
 
-    Makefile			Makefile for both shared and static libraries
-
+    GNUmakefile			a nice Makefile, for GNU make
+    Makefile			an ugly Unix Makefile (for older make's)
+    libamd.def			AMD definitions for Windows

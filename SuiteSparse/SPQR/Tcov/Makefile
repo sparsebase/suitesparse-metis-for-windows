@@ -2,35 +2,34 @@
 # SuiteSparseQR/Tcov/Makefile
 #===============================================================================
 
-# This test requires METIS, and it only works on Linux.
+# This test requires METIS
 
 # run statement-coverage test without Valgrind
-default: go
+default: $(METIS) go
 
 # to run with Valgrind as well
-valgrind: vgo
+valgrind: $(METIS) vgo
 
 ccode: all
 
 include ../../SuiteSparse_config/SuiteSparse_config.mk
-
-# this test requires gcc
-CC = gcc
-CXX= g++
-BLAS = -lrefblas
-LAPACK = -llapack
 
 # for statement coverage (with gcov; see go) and picky compiler warnings
 CF = -pg \
 	-O0 -g -fprofile-arcs -ftest-coverage \
 	-Wall -W -Wshadow -Winline -Wno-unused-parameter \
 	-Wredundant-decls -Wdisabled-optimization \
-	-ansi -fexceptions -fopenmp
+	-ansi -fexceptions
 
-# Using an optimized BLAS can cause problems in Valgrind
-# FLIB = -llapack_plain -lblas_plain -lgfortran
+# Use the standard reference BLAS, and LAPACK, both compiled with -g,
+# for best diagnostics.  Also, some BLAS (such as the Goto BLAS) cause
+# problems for Valgrind (using instructions that Valgrind doesn't understand).
+  FLIB = -llapack_plain -lblas_plain -lgfortran
 # FLIB = -llapack_plain -lblas_plain -lgfortran -lg2c
-  FLIB = $(LAPACK) $(BLAS)
+
+# This can be used, but severe valgrind failures may occur in the BLAS,
+# because of how the BLAS is optimized:
+# FLIB = $(LAPACK) $(BLAS)
 
 #-------------------------------------------------------------------------------
 
@@ -41,7 +40,13 @@ NVCC = /usr/local/cuda/bin/nvcc -g --profile --generate-line-info $(NV20) \
 
 #-------------------------------------------------------------------------------
 
-CLIB = -L../../lib -lcholmod -lamd -lcolamd -lccolamd -lcamd -lmetis -lsuitesparseconfig
+CLIB = ../../CHOLMOD/Lib/libcholmod.a \
+       ../../AMD/Lib/libamd.a \
+       ../../COLAMD/Lib/libcolamd.a \
+       ../../CCOLAMD/Lib/libccolamd.a \
+       ../../CAMD/Lib/libcamd.a \
+       ../../SuiteSparse_config/libsuitesparseconfig.a \
+       $(METIS)
 
 all: qrtest gpudemo qrdemo_gpu
 
@@ -51,11 +56,11 @@ purge: distclean
 
 distclean: clean
 	- $(RM) qrtest qrtest_out.txt pfile tfile cov.out qrtest_out1.txt
-	- $(RM) gpuqrengine_demo troll.m qrdemo_gpu gpu_results.txt X.mtx
-	- $(RM) -r $(PURGE)
+	- $(RM) gpuqrengine_demo troll.m qrdemo_gpu gpu_results.txt
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)
+	- $(RM) -r *.dSYM
 
 INC = ../Include/spqr.hpp ../Include/SuiteSparseQR_C.h \
 	../Include/SuiteSparseQR_definitions.h \
@@ -149,17 +154,18 @@ I = -I../../CHOLMOD/Include -I../../SuiteSparse_config -I../Include \
 
 ifneq ($(GPU_CONFIG),)
     I += -I../../SuiteSparse_GPURuntime/Include \
-        -I../../GPUQREngine/Include $(CUDA_INC)
+        -I../../GPUQREngine/Include \
+        -I$(CUDA_INC_PATH)
 endif
 
-C = $(CXX) $(CF) $(I) $(SPQR_CONFIG)
+C = $(CXX) $(CF) $(I) $(SPQR_CONFIG) $(GPU_CONFIG)
 
-LIBS = $(CLIB) $(FLIB) $(LDLIBS) $(CUDA_LIB)
+LIBS = $(CLIB) $(FLIB) $(LIB) $(CUDA_LIB)
 
 qrtestc.o: qrtestc.c $(INC)
 	$(CC) $(CF) $(I) -c $<
 
-qrtest: libraries qrtest.cpp $(INC) $(OBJ)
+qrtest: $(CLIB) qrtest.cpp $(INC) $(OBJ)
 	$(C) qrtest.cpp -o qrtest $(OBJ) $(LIBS) -lm
 
 ifneq ($(GPU_CONFIG),)
@@ -174,7 +180,7 @@ else
 gpu:
 endif
 
-gpuqrengine_demo: libraries \
+gpuqrengine_demo: $(CLIB) \
         ../../GPUQREngine/Demo/gpuqrengine_demo.cpp $(INC) $(OBJ)
 	$(C) $(GPUQRDEMO)/gpuqrengine_demo.cpp -o gpuqrengine_demo \
                 $(OBJ) $(LIBS) -lm
@@ -334,14 +340,26 @@ spqrgpu_computeFrontStaging.o: ../SPQRGPU/spqrgpu_computeFrontStaging.cpp
 # libraries compiled without test coverage
 #-------------------------------------------------------------------------------
 
-libraries:
-	( cd ../.. && $(MAKE) metis )
-	( cd ../../CHOLMOD && $(MAKE) library TCOV=yes )
-	( cd ../../AMD && $(MAKE) library TCOV=yes )
-	( cd ../../COLAMD && $(MAKE) library TCOV=yes )
-	( cd ../../CCOLAMD && $(MAKE) library TCOV=yes )
-	( cd ../../CAMD && $(MAKE) library TCOV=yes )
-	( cd ../../SuiteSparse_config ; $(MAKE) library TCOV=yes )
+$(METIS):
+	( cd ../../metis-4.0/Lib && $(MAKE) )
+
+../../CHOLMOD/Lib/libcholmod.a:
+	( cd ../../CHOLMOD && $(MAKE) library )
+
+../../AMD/Lib/libamd.a:
+	( cd ../../AMD && $(MAKE) library )
+
+../../COLAMD/Lib/libcolamd.a:
+	( cd ../../COLAMD && $(MAKE) library )
+
+../../CCOLAMD/Lib/libccolamd.a:
+	( cd ../../CCOLAMD && $(MAKE) library )
+
+../../CAMD/Lib/libcamd.a:
+	( cd ../../CAMD && $(MAKE) library )
+
+../../SuiteSparse_config/libsuitesparseconfig.a:
+	( cd ../../SuiteSparse_config ; $(MAKE) library )
 
 #-------------------------------------------------------------------------------
 # SuiteSparse_GPURuntime

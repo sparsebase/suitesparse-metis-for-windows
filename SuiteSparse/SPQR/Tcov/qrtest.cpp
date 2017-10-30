@@ -804,14 +804,10 @@ double erand (double range)
 
 Complex erand (Complex range)
 {
-    /*
     Complex x ;
     x.real ( ) = xrand ( ) ;
     x.imag ( ) = xrand ( ) ;
     return (range * x) ;
-    */
-    Complex i = Complex (0,1) ;
-    return (range * (xrand ( ) + i * xrand ( ))) ;
 }
 
 

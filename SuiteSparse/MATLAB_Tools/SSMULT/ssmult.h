@@ -22,12 +22,6 @@
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
-#define MXFREE(a) { \
-    void *ptr ; \
-    ptr = (void *) (a) ; \
-    if (ptr != NULL) mxFree (ptr) ; \
-}
-
 mxArray *ssmult_transpose       /* returns C = A' or A.' */
 (
     const mxArray *A,

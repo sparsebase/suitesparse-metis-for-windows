@@ -1,9 +1,8 @@
 #------------------------------------------------------------------------------
-# AMD Makefile
+# AMD Makefile (for GNU Make or original make)
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 2.4.1
 
 default: all
 
@@ -61,9 +60,14 @@ lib: library
 
 # install AMD
 install:
-	( cd Lib  ; $(MAKE) install )
+	$(CP) Lib/libamd.a $(INSTALL_LIB)/libamd.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libamd.$(VERSION).a libamd.a )
+	$(CP) Include/amd.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libamd*
+	chmod 644 $(INSTALL_INCLUDE)/amd.h
 
 # uninstall AMD
 uninstall:
-	( cd Lib  ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libamd*.a
+	$(RM) $(INSTALL_INCLUDE)/amd.h
 

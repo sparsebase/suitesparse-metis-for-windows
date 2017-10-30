@@ -22,7 +22,6 @@
 
 #ifndef NCHECK
 
-#include "cholmod_config.h"
 #include "cholmod_internal.h"
 #include "cholmod_check.h"
 #include "cholmod_matrixops.h"

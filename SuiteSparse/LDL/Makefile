@@ -2,8 +2,7 @@
 # LDL Makefile
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 2.2.1
 
 default: all
 
@@ -51,9 +50,14 @@ lib: library
 
 # install LDL
 install:
-	( cd Lib ; $(MAKE) install )
+	$(CP) Lib/libldl.a $(INSTALL_LIB)/libldl.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libldl.$(VERSION).a libldl.a )
+	$(CP) Include/ldl.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libldl*.a
+	chmod 644 $(INSTALL_INCLUDE)/ldl.h
 
 # uninstall LDL
 uninstall:
-	( cd Lib ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libldl*.a
+	$(RM) $(INSTALL_INCLUDE)/ldl.h
 

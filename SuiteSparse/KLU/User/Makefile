@@ -16,10 +16,11 @@ libklu_cholmod.a:  library klu_cholmod.c klu_cholmod.h
 distclean: purge
 
 purge: clean
-	- $(RM) -r $(PURGE)
+	- $(RM) *.o *.a
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)
+	- $(RM) -r *.dSYM
 
 library:
 	( cd ../../AMD ; $(MAKE) library )

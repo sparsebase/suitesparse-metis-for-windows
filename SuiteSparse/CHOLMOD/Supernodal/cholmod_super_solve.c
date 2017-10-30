@@ -15,7 +15,6 @@
  * interface that performs that operation.
  */
 
-#ifndef NGPL
 #ifndef NSUPERNODAL
 
 #include "cholmod_internal.h"
@@ -214,5 +213,4 @@ int CHOLMOD(super_ltsolve)  /* TRUE if OK, FALSE if BLAS overflow occured */
     }
     return (Common->blas_ok) ;
 }
-#endif
 #endif

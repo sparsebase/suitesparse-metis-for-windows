@@ -2,8 +2,7 @@
 # BTF Makefile
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 1.2.1
 
 default: library
 
@@ -24,8 +23,14 @@ purge: distclean
 
 # install BTF
 install:
-	( cd Lib ; $(MAKE) install )
+	$(CP) Lib/libbtf.a $(INSTALL_LIB)/libbtf.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libbtf.$(VERSION).a libbtf.a )
+	$(CP) Include/btf.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libbtf*.a
+	chmod 644 $(INSTALL_INCLUDE)/btf.h
 
 # uninstall BTF
 uninstall:
-	( cd Lib ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libbtf*.a
+	$(RM) $(INSTALL_INCLUDE)/btf.h
+

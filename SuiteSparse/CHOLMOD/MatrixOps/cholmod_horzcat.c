@@ -23,7 +23,6 @@
  * A and B cannot be complex or zomplex, unless values is FALSE.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -201,5 +200,4 @@ cholmod_sparse *CHOLMOD(horzcat)
     CHOLMOD(free_sparse) (&B2, Common) ;
     return (C) ;
 }
-#endif
 #endif

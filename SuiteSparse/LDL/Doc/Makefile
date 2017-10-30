@@ -13,10 +13,10 @@ include ../../SuiteSparse_config/SuiteSparse_config.mk
 distclean: purge
 
 purge: clean
-	- $(RM) -r $(PURGE)
+	- $(RM) *.dvi *.aux *.log *.bak *.bbl *.blg *.ps
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)
 
 #-------------------------------------------------------------------------------
 # user guide:

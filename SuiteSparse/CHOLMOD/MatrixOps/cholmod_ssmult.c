@@ -34,7 +34,6 @@
  * is FALSE).
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -485,5 +484,4 @@ cholmod_sparse *CHOLMOD(ssmult)
     ASSERT (CHOLMOD(dump_work) (TRUE, TRUE, values ? n1:0, Common)) ;
     return (C) ;
 }
-#endif
 #endif

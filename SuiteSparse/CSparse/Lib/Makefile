@@ -1,30 +1,9 @@
-# On the Mac, you need to first install Xcode.  Then
-# type this command in the Terminal:
-#       xcode-select --install
-# to ensure that you have the command-line tools installed.
-#
-# To just compile the library, do:
-#       make
-#
-# To run a demo using the library 
-#       cd ../Demo ; make
-#
-# For system-wide installation, I recommend that you install CXSparse instead.
-# The CSparse library is meant for personal experimentation.  The 'make
-# install' in this Makefile only installs a static compiled library in
-# CSparse/Lib.  It does not install it for system-wide usage.
-
-LIBRARY = libcsparse
-
-CF = $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -O -fPIC
+CF = $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -O
 I = -I../Include
 RANLIB = ranlib
 ARCHIVE = $(AR) $(ARFLAGS)
-CP = cp -f
 
-AR_TARGET = $(LIBRARY).a
-
-all: install
+all: libcsparse.a
 
 CS = cs_add.o cs_amd.o cs_chol.o cs_cholsol.o cs_counts.o cs_cumsum.o \
 	cs_droptol.o cs_dropzeros.o cs_dupl.o cs_entry.o \
@@ -41,15 +20,9 @@ $(CS): ../Include/cs.h Makefile
 %.o: ../Source/%.c ../Include/cs.h
 	$(CC) $(CF) $(I) -c $<
 
-$(AR_TARGET): $(CS)
-	$(ARCHIVE)  $@ $^
-	- $(RANLIB) $@
-
-# install CSparse in this directory
-install: $(AR_TARGET)
-
-# uninstall CSparse
-uninstall: purge
+libcsparse.a: $(CS)
+	$(ARCHIVE)  libcsparse.a $(CS)
+	- $(RANLIB) libcsparse.a
 
 clean:
 	- $(RM) *.o
@@ -57,5 +30,4 @@ clean:
 purge: distclean
 
 distclean: clean
-	- $(RM) *.a *.obj *.dll *.dylib *.so *.so.*
-
+	- $(RM) *.a *.obj *.dll

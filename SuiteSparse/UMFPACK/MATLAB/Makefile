@@ -11,11 +11,8 @@ include ../../SuiteSparse_config/SuiteSparse_config.mk
 # Remove all but the files in the original distribution
 #-------------------------------------------------------------------------------
 
-distclean: purge
-
 purge: clean
-	- $(RM) luflop.mex* umfpack.mex* rename.h GKlib_util.c GKlib_graph.c
-	- $(RM) -r $(PURGE)
+	- $(RM) *.mex* rename.h
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)

@@ -69,7 +69,6 @@ Int check_partition (cholmod_sparse *A, Int *Part)
 
     if (A == NULL || Part == NULL || A->nrow != A->ncol)
     {
-        /* printf ("A NULL, no Partition, or rectangular\n") ; */
 	return (EMPTY) ;
     }
     n = A->nrow ;
@@ -82,22 +81,18 @@ Int check_partition (cholmod_sparse *A, Int *Part)
     chek [1] = 0 ;
     chek [2] = 0 ;
 
-    /* printf ("\ncheck partition:\n") ; */
     for (j = 0 ; j < n ; j++)
     {
 	which = Part [j] ;
-        /* printf ("node "ID" in Part "ID"\n", j, which) ; */
 	p = Ap [j] ;
 	pend = (packed) ? (Ap [j+1]) : (p + Anz [j]) ;
 	for ( ; p < pend ; p++)
 	{
 	    i = Ai [p] ;
-            /* printf ("   neighbor "ID" in part "ID"\n", i, Part [i]) ; */
 	    if (which == 0)
 	    {
 		if (Part [i] == 1)
 		{
-                    /* printf ("   broken!\n") ; */
 		    return (EMPTY) ;
 		}
 	    }
@@ -105,22 +100,16 @@ Int check_partition (cholmod_sparse *A, Int *Part)
 	    {
 		if (Part [i] == 0)
 		{
-                    /* printf ("   broken!\n") ; */
 		    return (EMPTY) ;
 		}
 	    }
 	}
 	if (which < 0 || which > 2)
 	{
-            /* printf ("   node j, invalid partition, broken!\n") ; */
 	    return (EMPTY) ;
 	}
 	chek [which]++ ;
     }
-    /*
-    printf ("nodes in left: "ID" right: "ID" separator: "ID"\n",
-        chek [0], chek [1], chek [2]) ;
-    */
     return (chek [2]) ;
 }
 
@@ -847,21 +836,16 @@ double test_ops (cholmod_sparse *A)
 	Int *Cnw, *Cew, *Cmember, *CParent, *Perm ;
 	double save1 ;
 
-	/* try CHOLMOD's interface to METIS_ComputeVertexSeparator */
+	/* try CHOLMOD's interface to METIS_NodeComputeSeparator */
 	cm->metis_memory = 2.0 ;
-        /* cm->print = 5 ; */
 	CHOLMOD(print_sparse) (A, "A for bisect", cm) ;
 	csep = CHOLMOD(bisect) (A, NULL, 0, TRUE, Partition, cm) ;
 	if (csep != EMPTY)
 	{
-            Int csep2 ;
-            /* printf ("csep %g\n", (double) csep) ; */
-            csep2 = check_partition (A, Partition) ;
-            /* printf ("csep2 %g\n", (double) csep2) ; */
-	    OK (csep == csep2) ;
+	    OK (csep == check_partition (A, Partition)) ;
 	}
 
-	/* try the raw interface to METIS_ComputeVertexSeparator */
+	/* try the raw interface to METIS_NodeComputeSeparator */
 	CHOLMOD(print_sparse) (A, "A for metis bisect", cm) ;
 
 	/* C = A+A', remove the diagonal */

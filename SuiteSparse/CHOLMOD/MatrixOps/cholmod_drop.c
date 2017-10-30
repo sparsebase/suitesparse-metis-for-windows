@@ -19,7 +19,6 @@
  * Supports pattern and real matrices, complex and zomplex not supported.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -181,5 +180,4 @@ int CHOLMOD(drop)
     ASSERT (CHOLMOD(dump_sparse) (A, "A dropped", Common) >= 0) ;
     return (TRUE) ;
 }
-#endif
 #endif

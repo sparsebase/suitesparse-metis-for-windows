@@ -38,7 +38,6 @@
  * are supported only when "values" is FALSE.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -423,5 +422,4 @@ cholmod_sparse *CHOLMOD(submatrix)
     ASSERT (CHOLMOD(dump_work) (TRUE, TRUE, 0, Common)) ;
     return (C) ;
 }
-#endif
 #endif
