@@ -1,24 +1,14 @@
 
-default: linux
-
 include ../../SuiteSparse_config/SuiteSparse_config.mk
 
 linux: distclean
-	# ( cd ../..   	   && $(MAKE) purge )
-	( cd ../..   	   && $(MAKE) metis )
-	( cd ../../SuiteSparse_config && $(MAKE) TCOV=yes )
-	( cd ../../AMD     && $(MAKE) TCOV=yes )
-	( cd ../../CAMD    && $(MAKE) TCOV=yes )
-	( cd ../../COLAMD  && $(MAKE) TCOV=yes )
-	( cd ../../CCOLAMD && $(MAKE) TCOV=yes )
-	( cd ../../CHOLMOD && $(MAKE) TCOV=yes )
-	./DO.all $(TCOV_TMP)
+	./DO.all
 
 clean:
-	- $(RM) -r $(TCOV_TMP)/UMFPACK_TCOV_TMP
+	- $(RM) -r Out/*
 
-distclean: clean
-	- $(RM) -r cover.out covall_err.out
+distclean:
+	- $(RM) -r Out/* cover.out
 
 purge: distclean
 

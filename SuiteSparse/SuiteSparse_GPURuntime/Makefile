@@ -2,8 +2,7 @@
 # SuiteSparse_GPURuntime Makefile
 #-------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 1.0.0
 
 default: all
 
@@ -29,9 +28,13 @@ distclean: purge
 
 ccode: all
 
+# install SuiteSparse_GPURuntime (just the library, not the include files)
 install:
-	( cd Lib ; $(MAKE) install )
+	$(CP) Lib/libSuiteSparse_GPURuntime.a $(INSTALL_LIB)/libSuiteSparse_GPURuntime.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libSuiteSparse_GPURuntime.$(VERSION).a libSuiteSparse_GPURuntime.a )
+	chmod 644 $(INSTALL_LIB)/libSuiteSparse_GPURuntime*.a
 
+# uninstall SuiteSparse_GPURuntime
 uninstall:
-	( cd Lib ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libSuiteSparse_GPURuntime*.a
 

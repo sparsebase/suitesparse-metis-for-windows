@@ -21,7 +21,6 @@
  * is used, it can have any valid xtype).
  */
 
-#ifndef NGPL
 #ifndef NMODIFY
 
 #include "cholmod_internal.h"
@@ -459,5 +458,4 @@ int CHOLMOD(rowdel_mark)
     ASSERT (CHOLMOD(dump_work) (TRUE, TRUE, 2*n, Common)) ;
     return (ok) ;
 }
-#endif
 #endif

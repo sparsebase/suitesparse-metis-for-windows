@@ -2,7 +2,7 @@ default: all
 
 include ../../SuiteSparse_config/SuiteSparse_config.mk
 
-all: CHOLMOD_UserGuide.pdf purge
+all: UserGuide.pdf purge
 
 I = \
 	../Include/cholmod.h \
@@ -36,7 +36,6 @@ M = \
 	../MATLAB/ldlsolve.m \
 	../MATLAB/ldlsplit.m \
 	../MATLAB/ldlupdate.m \
-	../MATLAB/ldlrowmod.m \
 	../MATLAB/metis.m \
 	../MATLAB/nesdis.m \
 	../MATLAB/resymbol.m \
@@ -47,7 +46,7 @@ M = \
 	../MATLAB/mwrite.m \
 	../MATLAB/symbfact2.m
 
-CHOLMOD_UserGuide.pdf: CHOLMOD_UserGuide.tex UserGuide.bib $(I) $(C) $(M) Makefile getproto rule.awk header.tex footer.tex getmproto mfooter.tex mheader.tex mfile.awk
+UserGuide.pdf: UserGuide.tex UserGuide.bib $(I) $(C) $(M) Makefile getproto rule.awk header.tex footer.tex getmproto mfooter.tex mheader.tex mfile.awk
 	./getmproto ../MATLAB/analyze.m > _analyze_m.tex
 	./getmproto ../MATLAB/bisect.m > _bisect_m.tex
 	./getmproto ../MATLAB/chol2.m > _chol2_m.tex
@@ -62,7 +61,6 @@ CHOLMOD_UserGuide.pdf: CHOLMOD_UserGuide.tex UserGuide.bib $(I) $(C) $(M) Makefi
 	./getmproto ../MATLAB/ldlsolve.m > _ldlsolve_m.tex
 	./getmproto ../MATLAB/ldlsplit.m > _ldlsplit_m.tex
 	./getmproto ../MATLAB/ldlupdate.m > _ldlupdate_m.tex
-	./getmproto ../MATLAB/ldlrowmod.m > _ldlrowmod_m.tex
 	./getmproto ../MATLAB/metis.m > _metis_m.tex
 	./getmproto ../MATLAB/mread.m > _mread_m.tex
 	./getmproto ../MATLAB/spsym.m > _spsym_m.tex
@@ -217,17 +215,17 @@ CHOLMOD_UserGuide.pdf: CHOLMOD_UserGuide.tex UserGuide.bib $(I) $(C) $(M) Makefi
 	./getproto '/long cholmod_bisect/, /\*\) ;/' ../Include/cholmod_partition.h > _bisect.tex
 	./getproto '/long cholmod_metis_bisector/, /\*\) ;/' ../Include/cholmod_partition.h > _metis_bisector.tex
 	./getproto '/long cholmod_collapse_septree/, /\*\) ;/' ../Include/cholmod_partition.h > _collapse_septree.tex
-	pdflatex CHOLMOD_UserGuide
-	bibtex CHOLMOD_UserGuide
-	pdflatex CHOLMOD_UserGuide
-	pdflatex CHOLMOD_UserGuide
+	pdflatex UserGuide
+	bibtex UserGuide
+	pdflatex UserGuide
+	pdflatex UserGuide
 
 distclean: purge
 
 purge: clean
-	- $(RM) _temp.awk _*.tex
-	- $(RM) -r $(PURGE)
+	- $(RM) _temp.awk _*.tex *.dvi *.aux *.log *.lof *.lot *.toc *.bak 
+	- $(RM) *.bbl *.blg
+	- $(RM) -r *.dSYM
 
 clean:
 	- $(RM) -r $(CLEAN)
-

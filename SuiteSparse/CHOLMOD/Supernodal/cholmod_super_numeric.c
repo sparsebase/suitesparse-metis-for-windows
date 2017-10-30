@@ -56,7 +56,6 @@
  * must match.
  */
 
-#ifndef NGPL
 #ifndef NSUPERNODAL
 
 #include "cholmod_internal.h"
@@ -309,5 +308,4 @@ int CHOLMOD(super_numeric)
     CHOLMOD(free_dense) (&C, Common) ;
     return (ok) ;
 }
-#endif
 #endif

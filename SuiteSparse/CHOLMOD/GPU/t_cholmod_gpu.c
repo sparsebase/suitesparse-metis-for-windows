@@ -19,7 +19,6 @@
 #ifdef GPU_BLAS
 
 #include <string.h>
-#include <stdlib.h>
 #include "cholmod_template.h"
 
 #undef L_ENTRY
@@ -115,7 +114,7 @@ int TEMPLATE2 (CHOLMOD (gpu_init))
     }
 
     /* divvy up the memory in dev_mempool */
-    gpu_p->d_Lx[0] = (double *)Common->dev_mempool;
+	gpu_p->d_Lx[0] = (double *)Common->dev_mempool;
 	gpu_p->d_Lx[1] = (double *)((char *)Common->dev_mempool + Common->devBuffSize);
 	gpu_p->d_C = (double *)((char *)Common->dev_mempool + 2 * Common->devBuffSize);
 	gpu_p->d_A[0] = (double *)((char *)Common->dev_mempool + 3 * Common->devBuffSize);
@@ -272,7 +271,8 @@ void TEMPLATE2 (CHOLMOD (gpu_reorder_descendants))
 
     /* Sort the GPU-eligible supernodes */
     qsort ( scores, n_descendant, sizeof(struct cholmod_descendant_score_t),
-			(int(*)(const void *, const void *)) CHOLMOD(score_comp));
+            (int(*)(const void *, const void *)) CHOLMOD(score_comp));
+
     /* Place sorted data back in descendant supernode linked list*/
     if ( n_descendant > 0 ) {
         Head[*locals] = scores[0].d;

@@ -87,7 +87,6 @@
  * regardless of the value of the option parameter.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -486,5 +485,4 @@ int CHOLMOD(symmetry)
     }
     return (result) ;
 }
-#endif
 #endif

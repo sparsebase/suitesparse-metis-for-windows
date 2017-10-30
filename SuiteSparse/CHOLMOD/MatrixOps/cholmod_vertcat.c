@@ -23,7 +23,6 @@
  * are supported only if "values" is FALSE.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -199,5 +198,4 @@ cholmod_sparse *CHOLMOD(vertcat)
     CHOLMOD(free_sparse) (&B2, Common) ;
     return (C) ;
 }
-#endif
 #endif

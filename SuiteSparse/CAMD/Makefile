@@ -2,8 +2,7 @@
 # CAMD Makefile
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 2.4.1
 
 default: all
 
@@ -51,9 +50,14 @@ lib: library
 
 # install CAMD
 install:
-	( cd Lib ; $(MAKE) install )
+	$(CP) Lib/libcamd.a $(INSTALL_LIB)/libcamd.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libcamd.$(VERSION).a libcamd.a )
+	$(CP) Include/camd.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libcamd*.a
+	chmod 644 $(INSTALL_INCLUDE)/camd.h
 
 # uninstall CAMD
 uninstall:
-	( cd Lib ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libcamd*.a
+	$(RM) $(INSTALL_INCLUDE)/camd.h
 

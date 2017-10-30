@@ -32,7 +32,6 @@
  * must all match.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -147,5 +146,4 @@ int CHOLMOD(sdmult)
     DEBUG (CHOLMOD(dump_dense) (Y, "Y", Common)) ;
     return (TRUE) ;
 }
-#endif
 #endif

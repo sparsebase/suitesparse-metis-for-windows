@@ -17,7 +17,6 @@
  * Pattern, real, complex, and zomplex sparse matrices are supported.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -450,5 +449,4 @@ double CHOLMOD(norm_sparse)
 
     return (anorm) ;
 }
-#endif
 #endif

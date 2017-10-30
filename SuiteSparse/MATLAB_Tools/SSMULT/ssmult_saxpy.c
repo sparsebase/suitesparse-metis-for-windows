@@ -430,7 +430,7 @@ mxArray *ssmult_saxpy       /* return C = A*B */
     /* free workspace */
     /* ---------------------------------------------------------------------- */
 
-    MXFREE (Flag) ;
+    mxFree (Flag) ;
 
     /* ---------------------------------------------------------------------- */
     /* convert C to real if Cz is all zero */
@@ -439,7 +439,7 @@ mxArray *ssmult_saxpy       /* return C = A*B */
     if (C_is_complex && zallzero)
     {
         C_is_complex = 0 ;
-        MXFREE (Cz) ;
+        mxFree (Cz) ;
         Cz = NULL ;
     }
 
@@ -528,10 +528,10 @@ mxArray *ssmult_saxpy       /* return C = A*B */
 */
 
     C = mxCreateSparse (0, 0, 0, C_is_complex ? mxCOMPLEX : mxREAL) ;
-    MXFREE (mxGetJc (C)) ;
-    MXFREE (mxGetIr (C)) ;
-    MXFREE (mxGetPr (C)) ;
-    MXFREE (mxGetPi (C)) ;
+    mxFree (mxGetJc (C)) ;
+    mxFree (mxGetIr (C)) ;
+    mxFree (mxGetPr (C)) ;
+    mxFree (mxGetPi (C)) ;
     mxSetJc (C, (mwIndex *) Cp) ;
     mxSetIr (C, (mwIndex *) Ci) ;
     mxSetPr (C, Cx) ;

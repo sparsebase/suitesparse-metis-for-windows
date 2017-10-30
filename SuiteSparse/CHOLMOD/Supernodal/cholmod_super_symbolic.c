@@ -40,7 +40,6 @@
  * Supports any xtype (pattern, real, complex, or zomplex).
  */
 
-#ifndef NGPL
 #ifndef NSUPERNODAL
 
 #include "cholmod_internal.h"
@@ -990,5 +989,4 @@ int CHOLMOD(super_symbolic)
 {
     return (CHOLMOD(super_symbolic2) (TRUE, A, F, Parent, L, Common)) ;
 }
-#endif
 #endif

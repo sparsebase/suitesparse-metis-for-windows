@@ -2,8 +2,7 @@
 # COLAMD Makefile
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 2.9.1
 
 default: all
 
@@ -44,8 +43,14 @@ lib: library
 
 # install COLAMD
 install:
-	( cd Lib    ; $(MAKE) install )
+	$(CP) Lib/libcolamd.a $(INSTALL_LIB)/libcolamd.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libcolamd.$(VERSION).a libcolamd.a )
+	$(CP) Include/colamd.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libcolamd*.a
+	chmod 644 $(INSTALL_INCLUDE)/colamd.h
 
 # uninstall COLAMD
 uninstall:
-	( cd Lib    ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libcolamd*.a
+	$(RM) $(INSTALL_INCLUDE)/colamd.h
+

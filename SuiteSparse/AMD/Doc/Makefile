@@ -11,19 +11,19 @@ include ../../SuiteSparse_config/SuiteSparse_config.mk
 #------------------------------------------------------------------------------
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)
 
 purge: distclean
 
 distclean: clean
-	- $(RM) -r $(PURGE)
+	- $(RM) *.aux *.bbl *.blg *.log *.toc
 
 #------------------------------------------------------------------------------
 # Create the User Guide and Quick Start Guide
 #------------------------------------------------------------------------------
 
 AMD_UserGuide.pdf: AMD_UserGuide.tex AMD_UserGuide.bib ../Include/amd.h
-	echo '\begin{verbatim}' > amd_h.tex
+	echo '\\begin{verbatim}' > amd_h.tex
 	expand -8 ../Include/amd.h >> amd_h.tex
 	echo '\end{verbatim}' >> amd_h.tex
 	pdflatex AMD_UserGuide

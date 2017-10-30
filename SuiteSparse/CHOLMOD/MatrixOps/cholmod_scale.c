@@ -51,7 +51,6 @@
  * Only real matrices are supported.
  */
 
-#ifndef NGPL
 #ifndef NMATRIXOPS
 
 #include "cholmod_internal.h"
@@ -215,5 +214,4 @@ int CHOLMOD(scale)
     ASSERT (CHOLMOD(dump_sparse) (A, "A scaled", Common) >= 0) ;
     return (TRUE) ;
 }
-#endif
 #endif

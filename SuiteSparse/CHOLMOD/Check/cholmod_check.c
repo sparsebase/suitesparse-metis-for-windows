@@ -2577,7 +2577,7 @@ int CHOLMOD(dump_partition)
     SuiteSparse_long n,
     Int *Cp,
     Int *Ci,
-    Int *Cnw,       /* can be NULL */
+    Int *Cnw,
     Int *Part,
     SuiteSparse_long sepsize,
     cholmod_common *Common
@@ -2591,8 +2591,7 @@ int CHOLMOD(dump_partition)
     chek [2] = 0 ;
     for (j = 0 ; j < n ; j++)
     {
-	PRINT2 (("--------j "ID" in part "ID" nw "ID"\n", j, Part [j],
-            Cnw ? (Cnw[j]):1));
+	PRINT2 (("--------j "ID" in part "ID" nw "ID"\n", j, Part [j], Cnw[j]));
 	which = Part [j] ;
 	for (p = Cp [j] ; p < Cp [j+1] ; p++)
 	{
@@ -2620,7 +2619,7 @@ int CHOLMOD(dump_partition)
 	    PRINT0 (("Part out of range\n")) ;
 	    ok = FALSE ;
 	}
-	chek [which] += (Cnw ? (Cnw [j]) : 1) ;
+	chek [which] += Cnw [j] ;
     }
     PRINT1 (("sepsize %ld check "ID" "ID" "ID"\n",
 		sepsize, chek[0], chek[1],chek[2]));

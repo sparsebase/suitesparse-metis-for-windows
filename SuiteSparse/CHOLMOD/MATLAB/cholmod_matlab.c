@@ -55,6 +55,16 @@ void sputil_config (Long spumoni, cholmod_common *cm)
     /* error handler */
     cm->error_handler  = sputil_error_handler ;
 
+#ifndef NPARTITION
+#if defined(METIS_VERSION)
+#if (METIS_VERSION >= METIS_VER(4,0,2))
+    /* METIS 4.0.2 uses function pointers for malloc and free */
+    METIS_malloc = Suiteparse_config.malloc_func ;
+    METIS_free   = Suiteparse_config.free_func ;
+#endif
+#endif
+#endif
+
     /* Turn off METIS memory guard.  It is not needed, because mxMalloc will
      * safely terminate the mexFunction and free any workspace without killing
      * all of MATLAB.  This assumes cholmod_make was used to compile CHOLMOD
@@ -373,15 +383,14 @@ mxArray *sputil_put_sparse
     mxArray *Amatlab ;
     cholmod_sparse *A ;
     A = *Ahandle ;
-    if (!A || A->x == NULL) mexErrMsgTxt ("invalid sparse matrix") ;
     Amatlab = mxCreateSparse (0, 0, 0, 
 	    (A->xtype != CHOLMOD_REAL) ? mxCOMPLEX: mxREAL) ;
     mxSetM (Amatlab, A->nrow) ;
     mxSetN (Amatlab, A->ncol) ;
     mxSetNzmax (Amatlab, A->nzmax) ;
-    MXFREE (mxGetJc (Amatlab)) ;
-    MXFREE (mxGetIr (Amatlab)) ;
-    MXFREE (mxGetPr (Amatlab)) ;
+    mxFree (mxGetJc (Amatlab)) ;
+    mxFree (mxGetIr (Amatlab)) ;
+    mxFree (mxGetPr (Amatlab)) ;
     mxSetJc (Amatlab, A->p) ;
     mxSetIr (Amatlab, A->i) ;
     mxSetPr (Amatlab, A->x) ;
@@ -390,8 +399,7 @@ mxArray *sputil_put_sparse
     mexMakeMemoryPersistent (A->x) ;
     if (A->xtype != CHOLMOD_REAL)
     {
-        if (A->z == NULL) mexErrMsgTxt ("invalid complex sparse matrix") ;
-	MXFREE (mxGetPi (Amatlab)) ;
+	mxFree (mxGetPi (Amatlab)) ;
 	mxSetPi (Amatlab, A->z) ;
 	mexMakeMemoryPersistent (A->z) ;
     }
@@ -421,18 +429,16 @@ mxArray *sputil_put_dense
     mxArray *Amatlab ;
     cholmod_dense *A ;
     A = *Ahandle ;
-    if (!A || A->x == NULL) mexErrMsgTxt ("invalid dense matrix") ;
     Amatlab = mxCreateDoubleMatrix (0, 0,
 	    (A->xtype != CHOLMOD_REAL) ? mxCOMPLEX: mxREAL) ;
     mxSetM (Amatlab, A->nrow) ;
     mxSetN (Amatlab, A->ncol) ;
-    MXFREE (mxGetPr (Amatlab)) ;
+    mxFree (mxGetPr (Amatlab)) ;
     mxSetPr (Amatlab, A->x) ;
     mexMakeMemoryPersistent (A->x) ;
     if (A->xtype != CHOLMOD_REAL)
     {
-        if (A->z == NULL) mexErrMsgTxt ("invalid complex dense matrix") ;
-	MXFREE (mxGetPi (Amatlab)) ;
+	mxFree (mxGetPi (Amatlab)) ;
 	mxSetPi (Amatlab, A->z) ;
 	mexMakeMemoryPersistent (A->z) ;
     }
@@ -2075,7 +2081,7 @@ void sputil_sparse
 	    {
 		s_logical [k] = 1 ;
 	    }
-	    MXFREE (mxGetData (pargout [0])) ;
+	    mxFree (mxGetData (pargout [0])) ;
 	    mxSetData (pargout [0], s_logical) ;
 	    mexMakeMemoryPersistent (s_logical) ;
 	    k++ ;
@@ -2083,15 +2089,13 @@ void sputil_sparse
 	else
 
 #endif	
-        if (S->x == NULL) mexErrMsgTxt ("invalid sparse matrix") ;
 
 	if (mxIsComplex (pargin [2]))
 	{
 	    /* copy S into a MATLAB sparse complex double matrix */
-            if (S->z == NULL) mexErrMsgTxt ("invalid complex sparse matrix") ;
 	    pargout [0] = mxCreateSparse (0, 0, 0, mxCOMPLEX) ;
-	    MXFREE (mxGetPr (pargout [0])) ;
-	    MXFREE (mxGetPi (pargout [0])) ;
+	    mxFree (mxGetPr (pargout [0])) ;
+	    mxFree (mxGetPi (pargout [0])) ;
 	    mxSetPr (pargout [0], S->x) ;
 	    mxSetPi (pargout [0], S->z) ;
 	    mexMakeMemoryPersistent (S->x) ;
@@ -2113,8 +2117,8 @@ void sputil_sparse
 	mxSetM (pargout [0], S->nrow) ;
 	mxSetN (pargout [0], S->ncol) ;
 	mxSetNzmax (pargout [0], S->nzmax) ;
-	MXFREE (mxGetJc (pargout [0])) ;
-	MXFREE (mxGetIr (pargout [0])) ;
+	mxFree (mxGetJc (pargout [0])) ;
+	mxFree (mxGetIr (pargout [0])) ;
 	mxSetJc (pargout [0], S->p) ;
 	mxSetIr (pargout [0], S->i) ;
 	mexMakeMemoryPersistent (S->p) ;

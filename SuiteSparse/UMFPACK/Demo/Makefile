@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# compile the UMFPACK demos
+# compile the UMFPACK demos (for GNU make and original make)
 #-------------------------------------------------------------------------------
 
 # UMFPACK Copyright (c) Timothy A. Davis.
@@ -16,33 +16,78 @@ all64: libs run hb fortran64
 include ../../SuiteSparse_config/SuiteSparse_config.mk
 
 #-------------------------------------------------------------------------------
-# UMFPACK optionally uses the CHOLMOD Partition module
-LIB_WITH_CHOLMOD =
+# the optional Partition module requires METIS, CAMD, and CCOLAMD
+I_WITH_PARTITION = 
+LIB_WITH_PARTITION =
+CONFIG1 = -DNCHOLMOD
+CONFIG2 = -DNPARTITION
 ifeq (,$(findstring -DNCHOLMOD, $(UMFPACK_CONFIG)))
-    LIB_WITH_CHOLMOD = $(LIB_WITH_PARTITION) $(CUBLAS_LIB) $(CUDART_LIB)
+    # CHOLMOD is requested.  See if it is available
+    ifeq (../../CHOLMOD, $(wildcard ../../CHOLMOD))
+        ifeq (../../COLAMD, $(wildcard ../../COLAMD))
+            # CHOLMOD and COLAMD are available
+            CONFIG1 =
+            LIB_WITH_CHOLMOD = ../../CHOLMOD/Lib/libcholmod.a \
+                ../../COLAMD/Lib/libcolamd.a
+            # check if METIS is requested and available
+            ifeq (,$(findstring -DNPARTITION, $(CHOLMOD_CONFIG)))
+                # METIS is requested.  See if it is available
+                ifeq ($(METIS_PATH), $(wildcard $(METIS_PATH)))
+                    ifeq (../../CAMD, $(wildcard ../../CAMD))
+                        ifeq (../../CCOLAMD, $(wildcard ../../CCOLAMD))
+                            # METIS, CAMD, and CCOLAMD are available
+                            LIB_WITH_PARTITION = $(METIS) \
+                                ../../CCOLAMD/Lib/libccolamd.a \
+                                ../../CAMD/Lib/libcamd.a
+                            I_WITH_PARTITION = -I$(METIS_PATH)/Lib \
+                                -I../../CCOLAMD/Include -I../../CAMD/Include
+                            CONFIG2 =
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
 endif
-
 #-------------------------------------------------------------------------------
 
-C = $(CC) $(CF) $(UMFPACK_CONFIG) $(CONFIG_PARTITION) \
-    -I../../include
+C = $(CC) $(CF) $(UMFPACK_CONFIG) $(CONFIG1) $(CONFIG2) \
+    -I../Include -I../../AMD/Include -I../../SuiteSparse_config
 
-LIBS = $(LDLIBS) -L../../lib -lumfpack -lamd -lsuitesparseconfig \
-	$(LIB_WITH_CHOLMOD) $(LAPACK) $(BLAS)
+INC = ../Include/umfpack.h ../../AMD/Include/amd.h ../../SuiteSparse_config/SuiteSparse_config.h
 
-libs: metis
-	( cd ../../SuiteSparse_config ; $(MAKE) )
-	( cd ../../AMD ; $(MAKE) library )
+LIBS = $(LAPACK) $(BLAS) $(XERBLA) $(LIB) $(LIB_WITH_CHOLMOD) $(LIB_WITH_PARTITION) $(CUBLAS_LIB) $(CUDART_LIB)
+
+../Lib/libumfpack.a:
 	( cd ../Lib ; $(MAKE) )
+
+../../AMD/Lib/libamd.a:
+	( cd ../../AMD ; $(MAKE) library )
+
+../../SuiteSparse_config/libsuitesparseconfig.a:
+	( cd ../../SuiteSparse_config ; $(MAKE) library )
+
+../../CHOLMOD/Lib/libcholmod.a:
 	- ( cd ../../CHOLMOD && $(MAKE) library )
+
+../../COLAMD/Lib/libcolamd.a:
 	- ( cd ../../COLAMD && $(MAKE) library )
-	- ( cd ../../CCOLAMD ; $(MAKE) library )
-	- ( cd ../../CAMD ; $(MAKE) library )
 
-metis: ../../include/metis.h
 
-../../include/metis.h:
-	- ( cd ../.. && $(MAKE) metis )
+../../CCOLAMD/Lib/libccolamd.a:
+	- ( cd ../../CCOLAMD && $(MAKE) library )
+
+../../CAMD/Lib/libcamd.a:
+	- ( cd ../../CAMD && $(MAKE) library )
+
+$(METIS):
+	( cd $(METIS_PATH) && $(MAKE) )
+
+UMFPACK = ../Lib/libumfpack.a ../../AMD/Lib/libamd.a \
+    ../../SuiteSparse_config/libsuitesparseconfig.a \
+    $(LIB_WITH_CHOLMOD) $(LIB_WITH_PARTITION) 
+
+libs: $(UMFPACK)
 
 #-------------------------------------------------------------------------------
 # Create the demo programs, run them, and compare the output
@@ -50,15 +95,15 @@ metis: ../../include/metis.h
 
 dist: umfpack_di_demo.c umfpack_dl_demo.c umfpack_zi_demo.c umfpack_zl_demo.c
 
-umfpack_simple: umfpack_simple.c
-	$(C) -o umfpack_simple umfpack_simple.c $(LIBS)
+umfpack_simple: umfpack_simple.c $(INC) $(UMFPACK)
+	$(C) -o umfpack_simple umfpack_simple.c $(UMFPACK) $(LIBS)
 
 # the GNU rules are simpler:
 # umfpack_%_demo.c: umfpack_xx_demo.c umfpack_%_demo.sed
 # 	- sed -f umfpack_$*_demo.sed < umfpack_xx_demo.c > umfpack_$*_demo.c
 # 
-# umfpack_%_demo: umfpack_%_demo.c $(UMFPACK)
-# 	$(C) -o umfpack_$*_demo umfpack_$*_demo.c $(LIBS)
+# umfpack_%_demo: umfpack_%_demo.c $(INC) $(UMFPACK)
+# 	$(C) -o umfpack_$*_demo umfpack_$*_demo.c $(UMFPACK) $(LIBS)
 # 	./umfpack_$*_demo > my_umfpack_$*_demo.out
 
 # but do this via brute-force, so we can use just a single Makefile:
@@ -67,29 +112,29 @@ umfpack_simple: umfpack_simple.c
 umfpack_di_demo.c: umfpack_xx_demo.c umfpack_di_demo.sed
 	- sed -f umfpack_di_demo.sed < umfpack_xx_demo.c > umfpack_di_demo.c
 
-umfpack_di_demo: umfpack_di_demo.c
-	$(C) -o umfpack_di_demo umfpack_di_demo.c $(LIBS)
+umfpack_di_demo: umfpack_di_demo.c $(INC) $(UMFPACK)
+	$(C) -o umfpack_di_demo umfpack_di_demo.c $(UMFPACK) $(LIBS)
 
 # double-precision, SuiteSparse_long verion:
 umfpack_dl_demo.c: umfpack_xx_demo.c umfpack_dl_demo.sed
 	- sed -f umfpack_dl_demo.sed < umfpack_xx_demo.c > umfpack_dl_demo.c
 
-umfpack_dl_demo: umfpack_dl_demo.c
-	$(C) -o umfpack_dl_demo umfpack_dl_demo.c $(LIBS)
+umfpack_dl_demo: umfpack_dl_demo.c $(INC) $(UMFPACK)
+	$(C) -o umfpack_dl_demo umfpack_dl_demo.c $(UMFPACK) $(LIBS)
 
 # complex, int verion:
 umfpack_zi_demo.c: umfpack_xx_demo.c umfpack_zi_demo.sed
 	- sed -f umfpack_zi_demo.sed < umfpack_xx_demo.c > umfpack_zi_demo.c
 
-umfpack_zi_demo: umfpack_zi_demo.c
-	$(C) -o umfpack_zi_demo umfpack_zi_demo.c $(LIBS)
+umfpack_zi_demo: umfpack_zi_demo.c $(INC) $(UMFPACK)
+	$(C) -o umfpack_zi_demo umfpack_zi_demo.c $(UMFPACK) $(LIBS)
 
 # complex, SuiteSparse_long verion:
 umfpack_zl_demo.c: umfpack_xx_demo.c umfpack_zl_demo.sed
 	- sed -f umfpack_zl_demo.sed < umfpack_xx_demo.c > umfpack_zl_demo.c
 
-umfpack_zl_demo: umfpack_zl_demo.c
-	$(C) -o umfpack_zl_demo umfpack_zl_demo.c $(LIBS)
+umfpack_zl_demo: umfpack_zl_demo.c $(INC) $(UMFPACK)
+	$(C) -o umfpack_zl_demo umfpack_zl_demo.c $(UMFPACK) $(LIBS)
 
 run: umfpack_di_demo umfpack_zi_demo umfpack_dl_demo umfpack_zl_demo umfpack_simple
 	./umfpack_simple
@@ -130,8 +175,8 @@ hb: $(UMFPACK) umf4 readhb readhb_nozeros readhb_size
 	- ./readhb_size    < HB/arc130.rua > tmp/Asize
 	- ./umf4 a 1e-6
 
-umf4: umf4.c
-	$(C) -o umf4 umf4.c $(LIBS)
+umf4: umf4.c $(UMFPACK)
+	$(C) -o umf4 umf4.c $(UMFPACK) $(LIBS)
 
 readhb:  readhb.f
 	$(F77) $(F77FLAGS) -o readhb readhb.f $(F77LIB)
@@ -148,28 +193,31 @@ readhb_nozeros:  readhb_nozeros.f
 
 # This doesn't seem to work on the Mac (Snow Leopard, OS X 10.6.1)
 fortran: $(UMFPACK) umf4hb.f umf4_f77wrapper.o umf4zhb.f umf4_f77zwrapper.o $(UMFPACK)
-	$(F77) $(F77FLAGS) -o umf4hb umf4hb.f umf4_f77wrapper.o $(LIBS)
+	$(F77) $(F77FLAGS) -o umf4hb umf4hb.f umf4_f77wrapper.o \
+	    $(UMFPACK) $(LIBS)
 	- ./umf4hb < HB/west0067.rua > my_umf4hb.out
 	- diff my_umf4hb.out umf4hb.out
-	$(F77) $(F77FLAGS) -o umf4zhb umf4zhb.f umf4_f77zwrapper.o $(LIBS)
+	$(F77) $(F77FLAGS) -o umf4zhb umf4zhb.f umf4_f77zwrapper.o \
+	    $(UMFPACK) $(LIBS)
 	- ./umf4zhb < HB/qc324.cua > my_umf4zhb.out
 	- diff my_umf4zhb.out umf4zhb.out
 
 fortran64: $(UMFPACK) umf4hb64.f umf4_f77wrapper64.o umf4_f77zwrapper64.o $(UMFPACK)
-	$(F77) $(F77FLAGS) -o umf4hb64 umf4hb64.f umf4_f77wrapper64.o $(LIBS)
+	$(F77) $(F77FLAGS) -o umf4hb64 umf4hb64.f umf4_f77wrapper64.o \
+	    $(UMFPACK) $(LIBS)
 	- ./umf4hb64 < HB/west0067.rua > my_umf4hb64.out
 	- diff my_umf4hb64.out umf4hb64.out
 
-umf4_f77wrapper.o: umf4_f77wrapper.c
+umf4_f77wrapper.o: umf4_f77wrapper.c $(INC)
 	$(C) -c umf4_f77wrapper.c -o umf4_f77wrapper.o
 
-umf4_f77zwrapper.o: umf4_f77zwrapper.c
+umf4_f77zwrapper.o: umf4_f77zwrapper.c $(INC)
 	$(C) -c umf4_f77zwrapper.c -o umf4_f77zwrapper.o
 
-umf4_f77wrapper64.o: umf4_f77wrapper.c
+umf4_f77wrapper64.o: umf4_f77wrapper.c $(INC)
 	$(C) -DDLONG -c umf4_f77wrapper.c -o umf4_f77wrapper64.o
 
-umf4_f77zwrapper64.o: umf4_f77zwrapper.c
+umf4_f77zwrapper64.o: umf4_f77zwrapper.c $(INC)
 	$(C) -DZLONG -c umf4_f77zwrapper.c -o umf4_f77zwrapper64.o
 
 #-------------------------------------------------------------------------------
@@ -185,7 +233,7 @@ purge: clean
 	- $(RM) umf4hb umf4zhb *.umf my_umf4hb.out
 	- $(RM) umf4hb64 my_umf4hb64.out my_umf4zhb.out
 	- $(RM) umf4 readhb readhb_nozeros readhb_size tmp/*
-	- $(RM) -r $(PURGE)
+	- $(RM) -r *.dSYM
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)

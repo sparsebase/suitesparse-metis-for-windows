@@ -13,14 +13,14 @@ include ../../SuiteSparse_config/SuiteSparse_config.mk
 # Remove all but the files in the original distribution
 #-------------------------------------------------------------------------------
 
-# Note that UMFPACK_UserGuide.tex is created from UMFPACK_UserGuide.stex, the
-# files in the ../Include directory, and the ../Demo/umfpack_simple.c file.
+# Note that UserGuide.tex is created from UserGuide.stex, the files in 
+# the ../Include directory, and the ../Demo/umfpack_simple.c file.
 purge: clean
-	- $(RM) UMFPACK_UserGuide.tex
-	- $(RM) -r $(PURGE)
+	- $(RM) *.aux *.bbl *.blg *.log *.toc
+	- $(RM) UserGuide.tex
 
 clean:
-	- $(RM) -r $(CLEAN)
+	- $(RM) $(CLEAN)
 
 #-------------------------------------------------------------------------------
 # Create the User Guide and Quick Start Guide
@@ -42,18 +42,18 @@ USER = $(UMFPACKW) $(UMFPACK)
 
 SRC = $(addprefix ../Include/, $(addsuffix .h,$(USER))) ../Demo/umfpack_simple.c
 
-UMFPACK_UserGuide.pdf:  UMFPACK_UserGuide.stex UserGuide.sed1 UserGuide.sed2 $(SRC) UserGuide.bib
-	sed -f UserGuide.sed1 < UMFPACK_UserGuide.stex | sed -f UserGuide.sed2 \
-	    | expand -8 > UMFPACK_UserGuide.tex
-	pdflatex UMFPACK_UserGuide
-	bibtex UMFPACK_UserGuide
-	pdflatex UMFPACK_UserGuide
-	pdflatex UMFPACK_UserGuide
+UserGuide.pdf:  UserGuide.stex UserGuide.sed1 UserGuide.sed2 $(SRC) UserGuide.bib
+	sed -f UserGuide.sed1 < UserGuide.stex | sed -f UserGuide.sed2 \
+	    | expand -8 > UserGuide.tex
+	pdflatex UserGuide
+	bibtex UserGuide
+	pdflatex UserGuide
+	pdflatex UserGuide
 
-UMFPACK_QuickStart.pdf: UMFPACK_QuickStart.tex
-	pdflatex UMFPACK_QuickStart
-	pdflatex UMFPACK_QuickStart
+QuickStart.pdf: QuickStart.tex
+	pdflatex QuickStart
+	pdflatex QuickStart
 
-dist:  UMFPACK_QuickStart.pdf UMFPACK_UserGuide.pdf
+dist:  QuickStart.pdf UserGuide.pdf
 	- $(RM) *.aux *.bbl *.blg *.log *.toc
-	- $(RM) UMFPACK_UserGuide.tex
+	- $(RM) UserGuide.tex

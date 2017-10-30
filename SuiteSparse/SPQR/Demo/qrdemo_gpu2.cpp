@@ -22,8 +22,6 @@ int main (int argc, char **argv)
     size_t total_mem, available_mem ;
     double t ;
 
-    printf ("\nqrdemo_gpu2: Testing SPQR on the GPU:\n") ;
-
     // start CHOLMOD
     cholmod_common *cc, Common ;
     cc = &Common ;

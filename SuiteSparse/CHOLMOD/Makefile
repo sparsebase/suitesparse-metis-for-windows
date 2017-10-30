@@ -2,8 +2,11 @@
 # CHOLMOD Makefile
 #-------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 3.0.5
+
+# Note: If you do not have METIS, or do not wish to use it in CHOLMOD, you must
+# compile CHOLMOD with the -DNPARTITION flag.
+# See ../SuiteSparse_config/SuiteSparse_config.mk .
 
 default: all
 
@@ -11,7 +14,6 @@ include ../SuiteSparse_config/SuiteSparse_config.mk
 
 # Compile the C-callable libraries and the Demo programs.
 all:
-	( cd Lib ; $(MAKE) )
 	( cd Demo ; $(MAKE) )
 
 # Compile the C-callable libraries only.
@@ -25,7 +27,7 @@ purge:
 	( cd Valgrind ; $(MAKE) dopurge )
 	( cd Demo ; $(MAKE) purge )
 	( cd Doc ; $(MAKE) purge )
-	( cd MATLAB ; $(RM) $(CLEAN) rename.h *.mex* GKlib_util.c GKlib_graph.c )
+	( cd MATLAB ; $(RM) $(CLEAN) rename.h *.mex* )
 
 # Remove all files not in the original distribution, except keep the 
 # compiled libraries.
@@ -59,8 +61,15 @@ docs:
 
 # install CHOLMOD
 install:
-	( cd Lib ; $(MAKE) install )
+	$(CP) Lib/libcholmod.a $(INSTALL_LIB)/libcholmod.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libcholmod.$(VERSION).a libcholmod.a )
+	$(CP) Include/cholmod*.h $(INSTALL_INCLUDE)
+	$(RM) $(INSTALL_INCLUDE)/cholmod_internal.h
+	chmod 644 $(INSTALL_LIB)/libcholmod*.a
+	chmod 644 $(INSTALL_INCLUDE)/cholmod*.h
 
 # uninstall CHOLMOD
 uninstall:
-	( cd Lib ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libcholmod*.a
+	$(RM) $(INSTALL_INCLUDE)/cholmod*.h
+

@@ -38,6 +38,16 @@ int spqr_mx_config (Long spumoni, cholmod_common *cc)
     cc->error_handler = spqr_mx_error ;
     spqr_spumoni = spumoni ;
 
+#ifndef NPARTITION
+#if defined(METIS_VERSION)
+#if (METIS_VERSION >= METIS_VER(4,0,2))
+    // METIS 4.0.2 uses function pointers for malloc and free
+    METIS_malloc = SuiteSparse_config.malloc_func ;
+    METIS_free   = SuiteSparse_config.free_func ;
+#endif
+#endif
+#endif
+
     // Turn off METIS memory guard.  It is not needed, because mxMalloc will
     // safely terminate the mexFunction and free any workspace without killing
     // all of MATLAB.  This assumes spqr_make was used to compile SuiteSparseQR
@@ -438,7 +448,7 @@ int spqr_mx_get_options
             {
                 mexErrMsgIdAndTxt ("QR:invalidInput","invalid ordering option");
             }
-            MXFREE (s) ;
+            mxFree (s) ;
         }
     }
 
@@ -475,7 +485,7 @@ int spqr_mx_get_options
         {
             mexErrMsgIdAndTxt ("QR:invalidInput", "invalid Q option") ;
         }
-        MXFREE (s) ;
+        mxFree (s) ;
     }
 
     // -------------------------------------------------------------------------
@@ -498,7 +508,7 @@ int spqr_mx_get_options
         {
             mexErrMsgIdAndTxt ("QR:invalidInput", "invalid permutation option");
         }
-        MXFREE (s) ;
+        mxFree (s) ;
     }
 
     // -------------------------------------------------------------------------
@@ -526,7 +536,7 @@ int spqr_mx_get_options
         {
             mexErrMsgIdAndTxt ("QR:invalidInput", "invalid solution option");
         }
-        MXFREE (s) ;
+        mxFree (s) ;
     }
 
     // if haveB becomes TRUE, Qformat must be set to "discard"
@@ -556,8 +566,7 @@ static int put_values
         // A is complex, stored in interleaved form; split it for MATLAB
         Long k ;
         double z, *Ax2, *Az2 ;
-        MXFREE (mxGetPi (A)) ;
-        // Ax2 and Az2 will never be NULL, even if nz == 0
+        mxFree (mxGetPi (A)) ;
         Ax2 = (double *) cholmod_l_malloc (nz, sizeof (double), cc) ;
         Az2 = (double *) cholmod_l_malloc (nz, sizeof (double), cc) ;
         for (k = 0 ; k < nz ; k++)
@@ -574,8 +583,7 @@ static int put_values
         if (imag_all_zero)
         {
             // free the imaginary part, converting A to real
-            cholmod_l_free (1, sizeof (double), Az2, cc) ;
-            // the imaginary part can be NULL, for MATLAB
+            cholmod_l_free (nz, sizeof (double), Az2, cc) ;
             Az2 = NULL ;
         }
         mxSetPi (A, Az2) ;
@@ -585,11 +593,6 @@ static int put_values
     else
     {
         // A is real; just set Ax and return (do not free Ax) 
-        if (Ax == NULL)
-        {
-            // don't give MATLAB a null pointer
-            Ax = (double *) cholmod_l_malloc (1, sizeof (double), cc) ;
-        }
         mxSetPr (A, Ax) ;
     }
     return (TRUE) ;
@@ -619,9 +622,9 @@ mxArray *spqr_mx_put_sparse
     mxSetM (Amatlab, A->nrow) ;
     mxSetN (Amatlab, A->ncol) ;
     mxSetNzmax (Amatlab, A->nzmax) ;
-    MXFREE (mxGetJc (Amatlab)) ;
-    MXFREE (mxGetIr (Amatlab)) ;
-    MXFREE (mxGetPr (Amatlab)) ;
+    mxFree (mxGetJc (Amatlab)) ;
+    mxFree (mxGetIr (Amatlab)) ;
+    mxFree (mxGetPr (Amatlab)) ;
     mxSetJc (Amatlab, (mwIndex *) A->p) ;
     mxSetIr (Amatlab, (mwIndex *) A->i) ;
 
@@ -659,8 +662,8 @@ mxArray *spqr_mx_put_dense2
     A = mxCreateDoubleMatrix (0, 0, is_complex ? mxCOMPLEX : mxREAL) ;
     mxSetM (A, m) ;
     mxSetN (A, n) ; 
-    MXFREE (mxGetPr (A)) ;
-    MXFREE (mxGetPi (A)) ;
+    mxFree (mxGetPr (A)) ;
+    mxFree (mxGetPi (A)) ;
     put_values (m*n, A, Ax, is_complex, cc) ;
     return (A) ;
 }

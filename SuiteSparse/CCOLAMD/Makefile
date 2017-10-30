@@ -2,8 +2,7 @@
 # CCOLAMD Makefile
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 2.9.1
 
 default: all
 
@@ -44,8 +43,14 @@ lib: library
 
 # install CCOLAMD
 install:
-	( cd Lib  ; $(MAKE) install )
+	$(CP) Lib/libccolamd.a $(INSTALL_LIB)/libccolamd.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libccolamd.$(VERSION).a libccolamd.a )
+	$(CP) Include/ccolamd.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libccolamd*.a
+	chmod 644 $(INSTALL_INCLUDE)/ccolamd.h
 
 # uninstall CCOLAMD
 uninstall:
-	( cd Lib  ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libccolamd*.a
+	$(RM) $(INSTALL_INCLUDE)/ccolamd.h
+

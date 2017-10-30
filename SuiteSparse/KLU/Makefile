@@ -2,8 +2,7 @@
 # KLU Makefile
 #------------------------------------------------------------------------------
 
-SUITESPARSE ?= $(realpath $(CURDIR)/..)
-export SUITESPARSE
+VERSION = 1.3.2
 
 default: all
 
@@ -33,7 +32,7 @@ distclean:
 
 purge: distclean
 
-cov:
+cov: library
 	( cd Tcov ; $(MAKE) )
 
 # create PDF documents for the original distribution
@@ -42,8 +41,14 @@ docs:
 
 # install KLU
 install:
-	( cd Lib ; $(MAKE) install )
+	$(CP) Lib/libklu.a $(INSTALL_LIB)/libklu.$(VERSION).a
+	( cd $(INSTALL_LIB) ; ln -sf libklu.$(VERSION).a libklu.a )
+	$(CP) Include/klu.h $(INSTALL_INCLUDE)
+	chmod 644 $(INSTALL_LIB)/libklu*.a
+	chmod 644 $(INSTALL_INCLUDE)/klu.h
 
 # uninstall KLU
 uninstall:
-	( cd Lib ; $(MAKE) uninstall )
+	$(RM) $(INSTALL_LIB)/libklu*.a
+	$(RM) $(INSTALL_INCLUDE)/klu.h
+
